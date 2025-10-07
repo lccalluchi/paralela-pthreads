@@ -2,7 +2,7 @@
 
 Este proyecto implementa el cálculo de Pi usando diferentes estrategias de paralelismo con Pthreads, basado en el libro "An Introduction to Parallel Programming" de Peter Pacheco.
 
-## Estrategias Implementadas
+## Codigos Implementados
 
 Se crearon 4 implementaciones principales, como se solicita:
 
@@ -11,7 +11,6 @@ Se crearon 4 implementaciones principales, como se solicita:
 3.  **Busy-Waiting fuera del bucle FOR**: `04_pi_parallel_busy_cs.c`
 4.  **MUTEX**: `05_pi_parallel_mutex.c`
 
-Adicionalmente, se incluye `02_pi_parallel_race.c` como una versión preliminar que demuestra el problema de la condición de carrera al no tener sincronización.
 
 ---
 

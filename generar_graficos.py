@@ -28,19 +28,20 @@ def format_time(value, pos):
 # Leer datos
 df = pd.read_csv('resultados_benchmark.csv')
 
+# Filtrar solo las 4 implementaciones requeridas (ignorar race condition)
+df = df[df['programa'] != '02_pi_parallel_race'].copy()
+
 # Mapeo de nombres para gráficos
 nombres_programas = {
     '01_pi_serial': 'Serial',
-    '02_pi_parallel_race': 'Race Condition',
-    '03_pi_parallel_busy': 'Busy-Wait Ineficiente',
-    '04_pi_parallel_busy_cs': 'Busy-Wait Eficiente',
+    '03_pi_parallel_busy': 'Busy-Wait dentro del bucle',
+    '04_pi_parallel_busy_cs': 'Busy-Wait fuera del bucle',
     '05_pi_parallel_mutex': 'Mutex'
 }
 
 # Colores por programa
 colores = {
     '01_pi_serial': '#2E86AB',
-    '02_pi_parallel_race': '#A23B72',
     '03_pi_parallel_busy': '#F18F01',
     '04_pi_parallel_busy_cs': '#C73E1D',
     '05_pi_parallel_mutex': '#6A994E'
@@ -101,8 +102,8 @@ fig, ax = plt.subplots(figsize=(12, 8))
 hilos_range = range(1, 7)
 ax.plot(hilos_range, hilos_range, 'k--', linewidth=2, label='Speedup Ideal', alpha=0.5)
 
-# Calcular speedup para cada versión paralela
-for programa in ['02_pi_parallel_race', '04_pi_parallel_busy_cs', '05_pi_parallel_mutex']:
+# Calcular speedup para cada versión paralela (TODAS las versiones)
+for programa in ['03_pi_parallel_busy', '04_pi_parallel_busy_cs', '05_pi_parallel_mutex']:
     speedups = []
     hilos_list = []
 
@@ -131,18 +132,18 @@ plt.savefig('grafico_2_speedup_vs_hilos.png', dpi=300, bbox_inches='tight')
 plt.close()
 
 # ============================================================
-# GRÁFICO 3: Comparativa por Hilos (10M iteraciones) - SIN BUSY INEFICIENTE
+# GRÁFICO 3: Comparativa por Hilos (10M iteraciones)
 # ============================================================
 print("3. Comparativa por Hilos (barras)...")
 
 fig, ax = plt.subplots(figsize=(14, 8))
 
-# EXCLUIR busy-wait ineficiente para mejor visualización
-programas_comparar = ['02_pi_parallel_race', '04_pi_parallel_busy_cs', '05_pi_parallel_mutex']
+# INCLUIR todas las versiones paralelas
+programas_comparar = ['03_pi_parallel_busy', '04_pi_parallel_busy_cs', '05_pi_parallel_mutex']
 hilos_vals = sorted(df_10M['hilos'].unique())
 
 x = np.arange(len(hilos_vals))
-width = 0.25
+width = 0.2
 
 for i, programa in enumerate(programas_comparar):
     tiempos = []
@@ -164,7 +165,7 @@ ax.axhline(y=tiempo_serial, color=colores['01_pi_serial'],
 
 ax.set_xlabel('Número de Hilos', fontsize=12, fontweight='bold')
 ax.set_ylabel('Tiempo de Ejecución (segundos)', fontsize=12, fontweight='bold')
-ax.set_title('Comparativa de Tiempo por Estrategia (10M iteraciones)\n(Excluyendo Busy-Wait Ineficiente para mejor visualización)',
+ax.set_title('Comparativa de Tiempo por Estrategia (10M iteraciones)',
              fontsize=14, fontweight='bold', pad=20)
 ax.set_xticks(x)
 ax.set_xticklabels(hilos_vals)
@@ -184,7 +185,8 @@ fig, ax = plt.subplots(figsize=(12, 8))
 # Eficiencia ideal = 100%
 ax.axhline(y=100, color='black', linestyle='--', linewidth=2, label='Eficiencia Ideal (100%)', alpha=0.5)
 
-for programa in ['02_pi_parallel_race', '04_pi_parallel_busy_cs', '05_pi_parallel_mutex']:
+# INCLUIR todas las versiones paralelas
+for programa in ['03_pi_parallel_busy', '04_pi_parallel_busy_cs', '05_pi_parallel_mutex']:
     eficiencias = []
     hilos_list = []
 
@@ -207,7 +209,7 @@ ax.set_ylabel('Eficiencia (%)', fontsize=12, fontweight='bold')
 ax.set_title('Eficiencia Paralela vs Número de Hilos (10M iteraciones)',
              fontsize=14, fontweight='bold', pad=20)
 ax.set_xticks(range(1, 7))
-ax.set_ylim(0, 120)
+ax.set_ylim(-300, 120)  # Expandir para mostrar eficiencia negativa del busy-wait ineficiente
 ax.legend(fontsize=11)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -225,11 +227,11 @@ df_bajo = df[df['iteraciones'] <= 10000].copy()
 fig, ax = plt.subplots(figsize=(14, 8))
 
 iteraciones_vals = sorted(df_bajo['iteraciones'].unique())
-programas_comparar = ['01_pi_serial', '02_pi_parallel_race',
-                      '04_pi_parallel_busy_cs', '05_pi_parallel_mutex']
+# INCLUIR todas las versiones (serial + 3 paralelas)
+programas_comparar = ['01_pi_serial', '03_pi_parallel_busy', '04_pi_parallel_busy_cs', '05_pi_parallel_mutex']
 
 x = np.arange(len(iteraciones_vals))
-width = 0.2
+width = 0.18
 
 for i, programa in enumerate(programas_comparar):
     tiempos = []
@@ -265,8 +267,9 @@ plt.close()
 # ============================================================
 print("6. BONUS: Desastre Busy-Wait Ineficiente...")
 
-# Filtrar solo versión 3 vs serial y mutex
-df_comparacion = df[df['programa'].isin(['01_pi_serial', '03_pi_parallel_busy', '05_pi_parallel_mutex'])].copy()
+# Filtrar las 4 versiones permitidas
+df_comparacion = df[df['programa'].isin(['01_pi_serial', '03_pi_parallel_busy',
+                                          '04_pi_parallel_busy_cs', '05_pi_parallel_mutex'])].copy()
 
 fig, ax = plt.subplots(figsize=(12, 8))
 
