@@ -1,0 +1,22 @@
+# Archivos binarios compilados
+01_pi_serial
+02_pi_parallel_race
+03_pi_parallel_busy
+04_pi_parallel_busy_cs
+05_pi_parallel_mutex
+
+# Archivos de objetos
+*.o
+*.out
+
+# Archivos generados por los scripts
+resultados_benchmark.csv
+*.png
+
+# Archivos del sistema o IDE
+*:Zone.Identifier
+
+# Documentos generados (LaTeX)
+*.aux
+*.log
+*.synctex.gz
